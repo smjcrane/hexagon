@@ -8,8 +8,9 @@ def setupDrawing():
 	seperation=100
 	wood = v.box(pos =(0, 0, -1), size = (1000-seperation, 1000-seperation, 2), color=(0.7, 0.4, 0.1))
 	axes = []
+	
 	corners = [(4,0), (0,-4), (-4,-4), (-4,0), (0,4), (4,4), (4,0)]
-
+        #edges of the board
 	for i in range(len(corners)-1):
                 r0 = corners[i][0] * (3**0.5) / 2.0
                 c0 = corners[i][1] - 0.5*corners[i][0]
@@ -18,8 +19,43 @@ def setupDrawing():
                 c1 = corners[i+1][1] - 0.5*corners[i+1][0]
                 
                 axes.append( curve(pos=[(c0*seperation, r0*seperation, 1), (c1*seperation, r1*seperation, 1)], color=(1,0,0))  )
-	
-	
+
+        #lines of constant y
+	for y in range(-3, 4):
+                if y<0:
+                        x0 = -4
+                        x1 = 4+y
+                else:
+                        x0 = y-4
+                        x1 = 4
+
+                r0 = x0 * (3**0.5) / 2.0
+                c0 = y - 0.5*x0
+                
+                r1 = x1 * (3**0.5) / 2.0
+                c1 = y - 0.5*x1
+                
+                axes.append( curve(pos=[(c0*seperation, r0*seperation, 1), (c1*seperation, r1*seperation, 1)], color=(1,1,1))  )
+                #Do the y-x=constant lines at the same time by reflecting in the y axis
+                axes.append( curve(pos=[(c0*seperation, -r0*seperation, 1), (c1*seperation, -r1*seperation, 1)], color=(1,1,1))  )
+
+	#lines of constant x
+        for x in range(-3, 4):
+                if x<0:
+                        y0 = -4
+                        y1 = 4+x
+                else:
+                        y0 = x-4
+                        y1 = 4
+
+                r0 = x * (3**0.5) / 2.0
+                c0 = y0 - 0.5*x
+                
+                r1 = x * (3**0.5) / 2.0
+                c1 = y1 - 0.5*x
+                
+                axes.append( curve(pos=[(c0*seperation, r0*seperation, 1), (c1*seperation, r1*seperation, 1)], color=(1,1,1))  )
+
 
 def update(board):
 	spheres=[]
