@@ -1,4 +1,5 @@
 import visual as v
+from visual.graph import curve
 from boardmaker import *
 
 def setupDrawing():
@@ -6,6 +7,18 @@ def setupDrawing():
 	v.scene.center=(0,0,0)
 	seperation=100
 	wood = v.box(pos =(0, 0, -1), size = (1000-seperation, 1000-seperation, 2), color=(0.7, 0.4, 0.1))
+	axes = []
+	corners = [(4,0), (0,-4), (-4,-4), (-4,0), (0,4), (4,4), (4,0)]
+
+	for i in range(len(corners)-1):
+                r0 = corners[i][0] * (3**0.5) / 2.0
+                c0 = corners[i][1] - 0.5*corners[i][0]
+                
+                r1 = corners[i+1][0] * (3**0.5) / 2.0
+                c1 = corners[i+1][1] - 0.5*corners[i+1][0]
+                
+                axes.append( curve(pos=[(c0*seperation, r0*seperation, 1), (c1*seperation, r1*seperation, 1)], color=(1,0,0))  )
+	
 	
 
 def update(board):
