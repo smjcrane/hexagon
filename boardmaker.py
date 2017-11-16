@@ -39,17 +39,17 @@ class Tile:
         if not (x >= 3 or y >= 3):
             self.far_neighbours.append((x+2, y+2))
         #edgy:
-        if not (x <= -3):
+        if not (x <= -3 or y == -4 or x-y == -4):
             self.far_neighbours.append((x-2, y-1))
-        if not (x >= 3):
+        if not (x >= 3 or y == 4 or x-y == 4):
             self.far_neighbours.append((x+2, y+1))
-        if not (y <= -3):
+        if not (y <= -3 or x == -4 or x-y == 4):
             self.far_neighbours.append((x-1, y-2))
-        if not (y >= 3):
+        if not (y ==4 or x == -4 or x-y <= -3):
             self.far_neighbours.append((x-1, y+1))
-        if not (x-y <= -3):
+        if not (x == -4 or y == 4 or x-y <= -3):
             self.far_neighbours.append((x-1, y+1))
-        if not (x-y >= 3):
+        if not (x == 4 or y == -4 or x-y >= 3):
             self.far_neighbours.append((x+1, y-1))
         
 
