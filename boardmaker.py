@@ -39,7 +39,7 @@ class Tile:
         if not (x >= 3 or y >= 3):
             self.far_neighbours.append((x+2, y+2))
         #edgy:
-        """if not (x <= -3):
+        if not (x <= -3):
             self.far_neighbours.append((x-2, y-1))
         if not (x >= 3):
             self.far_neighbours.append((x+2, y+1))
@@ -50,7 +50,7 @@ class Tile:
         if not (x-y <= -3):
             self.far_neighbours.append((x-1, y+1))
         if not (x-y >= 3):
-            self.far_neighbours.append((x+1, y-1))"""
+            self.far_neighbours.append((x+1, y-1))
         
 
     def put_gem(self, colour):
