@@ -25,7 +25,33 @@ class Tile:
             self.neighbours.append((x+1, y+1))
 
         self.far_neighbours=[]
-        #TODO
+        #cornery:
+        if not (x <= -3 or x-y == -3):
+            self.far_neighbours.append((x-2, y))
+        if not (x >= 3 or x-y == 3):
+            self.far_neighbours.append((x+2, y))
+        if not (y <= -3 or x-y == 3):
+            self.far_neighbours.append((x, y-2))
+        if not (y >= 3 or x-y == -3):
+            self.far_neighbours.append((x, y+2))
+        if not (x <= -3 or y == -3):
+            self.far_neighbours.append((x-2, y-2))
+        if not (x >= 3 or y == 3):
+            self.far_neighbours.append((x+2, y+2))
+        #edgy:
+        if not (x <= -3):
+            self.far_neighbours.append((x-2, y-1))
+        if not (x >= 3):
+            self.far_neighbours.append((x+2, y+1))
+        if not (y <= -3):
+            self.far_neighbours.append((x-1, y-2))
+        if not (y >= 3):
+            self.far_neighbours.append((x-1, y+1))
+        if not (x-y <= -3):
+            self.far_neighbours.append((x+1, y-1))
+        if not (x-y >= 3):
+            self.far_neighbours.append((x-1, y+1))
+        
 
     def put_gem(self, colour):
         if self.colour == 0:
