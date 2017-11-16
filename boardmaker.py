@@ -72,7 +72,7 @@ class Board:
 
     def __init__(self):
         self.tiles = []
-        self.tile_lookup ={}
+        self.tile_lookup = {}
 
 
         for x in range(-4, 5):
@@ -97,4 +97,20 @@ class Board:
             source.empty()
         else:
             print("Error! attempt to jump to illegal tile")
+
+    def get_scores(self):
+        s1, s2 = 0, 0
+        for t in self.tiles:
+            if t.colour == 1:
+                s1 += 1
+            elif t.colour == 2:
+                s2 +=1
+        return (s1, s2)
+
+    def is_full(self):
+        e = 0
+        for t in self.tiles:
+            if t.colour == 0 and not t.blank:
+                e +=1
+        return e==0
         
