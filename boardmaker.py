@@ -26,20 +26,20 @@ class Tile:
 
         self.far_neighbours=[]
         #cornery:
-        if not (x <= -3 or x-y == -3):
+        if not (x <= -3 or x-y <= -3):
             self.far_neighbours.append((x-2, y))
-        if not (x >= 3 or x-y == 3):
+        if not (x >= 3 or x-y >= 3):
             self.far_neighbours.append((x+2, y))
-        if not (y <= -3 or x-y == 3):
+        if not (y <= -3 or x-y >= 3):
             self.far_neighbours.append((x, y-2))
-        if not (y >= 3 or x-y == -3):
+        if not (y >= 3 or x-y <= -3):
             self.far_neighbours.append((x, y+2))
-        if not (x <= -3 or y == -3):
+        if not (x <= -3 or y <= -3):
             self.far_neighbours.append((x-2, y-2))
-        if not (x >= 3 or y == 3):
+        if not (x >= 3 or y >= 3):
             self.far_neighbours.append((x+2, y+2))
         #edgy:
-        if not (x <= -3):
+        """if not (x <= -3):
             self.far_neighbours.append((x-2, y-1))
         if not (x >= 3):
             self.far_neighbours.append((x+2, y+1))
@@ -48,9 +48,9 @@ class Tile:
         if not (y >= 3):
             self.far_neighbours.append((x-1, y+1))
         if not (x-y <= -3):
-            self.far_neighbours.append((x+1, y-1))
-        if not (x-y >= 3):
             self.far_neighbours.append((x-1, y+1))
+        if not (x-y >= 3):
+            self.far_neighbours.append((x+1, y-1))"""
         
 
     def put_gem(self, colour):
@@ -90,11 +90,11 @@ class Board:
             print("Error! attempt to clone to illegal tile")
 
     def jump(self, source, target):
-        if (target.x, target.y) in source.neighbours and not target.blank:
+        if (target.x, target.y) in source.far_neighbours:# and not target.blank:
             target.put_gem(source.colour)
             for t in target.neighbours:
-                t.zap(source.colour)
+                self.tile_lookup[t].zap(source.colour)
             source.empty()
         else:
-            print("Error! attempt ot jump to illegal tile")
+            print("Error! attempt to jump to illegal tile")
         
