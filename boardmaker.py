@@ -3,7 +3,7 @@ class Tile:
     
     def __init__(self, x, y):
         self.x, self.y = x, y
-        self.blank = not ( (x,y) in [(0,-1), (-1,0), (1,1)] )
+        self.blank = ( (x,y) in [(0,-1), (-1,0), (1,1)] )
         self.colour = 0
         if (x, y) in [(4,0), (-4,-4), (0,4)]:
             self.colour = 1
@@ -82,7 +82,7 @@ class Board:
                 self.tile_lookup[(x,y)] = t
 
     def clone(self, source, target):
-        if (target.x, target.y) in source.neighbours:
+        if (target.x, target.y) in source.neighbours and not target.blank:
             target.put_gem(source.colour)
             for t in target.neighbours:
                 self.tile_lookup[t].zap(source.colour)
@@ -90,7 +90,7 @@ class Board:
             print("Error! attempt to clone to illegal tile")
 
     def jump(self, source, target):
-        if (target.x, target.y) in source.far_neighbours:# and not target.blank:
+        if (target.x, target.y) in source.far_neighbours and not target.blank:
             target.put_gem(source.colour)
             for t in target.neighbours:
                 self.tile_lookup[t].zap(source.colour)

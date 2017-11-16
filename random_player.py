@@ -10,11 +10,11 @@ def play(board, colour):
     for t in mine:
         for n in t.neighbours:
                 m = board.tile_lookup[n]
-                if m.colour == 0:
+                if m.colour == 0 and not m.blank:
                     allowed_clones.append((t, m))
         for f in t.far_neighbours:
                 m = board.tile_lookup[f]
-                if m.colour == 0:
+                if m.colour == 0 and not m.blank:
                     allowed_jumps.append((t, m))
     if len(allowed_clones) == 0:
         if len(allowed_jumps) == 0:
