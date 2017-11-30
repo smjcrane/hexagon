@@ -1,1 +1,5 @@
 *.pyc
+vis/
+visual/
+visual_common/
+vpython/
