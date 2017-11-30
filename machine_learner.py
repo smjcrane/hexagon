@@ -18,6 +18,7 @@ class MachineLearner:
 
 
     def __init__(self):
+        self.verbose = False
         if os.path.exists("params.npz"):
             print "Loading parameters from file..."
             data = np.load("params.npz")
@@ -27,9 +28,10 @@ class MachineLearner:
             print "No paramaters found. Creating random ones..."
             self.randomise_params()
             print "Done"
-        self.moves=[]
+        self.moves = []
         board = boardmaker.Board()
         self.vectorize_moves(board)
+        self.history = []
         
 
     def randomise_params(self):
@@ -38,12 +40,6 @@ class MachineLearner:
         self.third = np.random.rand(834, 500) - 0.5
         np.savez("params", first=self.first, second=self.second, third=self.third)
 
-    def get_input(self, board):
-        w = []
-        for t in board.tiles:
-            if not t.blank:
-                w.append(t.colour)
-        self.v = np.array(w)
 
     def vectorize_moves(self, board):
         for t in board.tiles:
@@ -56,10 +52,12 @@ class MachineLearner:
 
     def play(self, board, colour):
         move = self.make_move(board)
-        print move
+        if self.verbose:
+            print move
         source = board.tile_lookup[move[0]]
         if source.colour != colour:
-            print "Not my tile"
+            if self.verbose:
+                print "Not my tile"
             return
         target = board.tile_lookup[move[1]]
         if move[2] == "c":
@@ -69,6 +67,7 @@ class MachineLearner:
 
     def make_move(self, board):
         p = self.forward_propogate(board)
+        t = Turn(board, p)
         m = np.min(p)
         p = map( lambda x: x-m, p )
         s = np.sum(p)
@@ -77,13 +76,16 @@ class MachineLearner:
         c = 0
         for i in range(0, len(self.moves)):
             if c >= r:
+                t.put_move(self.moves[i])
+                self.history.append(t)
                 return self.moves[i]
             else:
                 c += p[i]
 
     def forward_propogate(self, board):
-        self.get_input(board)
-        a1 = np.dot(self.first, self.v)
+        #TODO add bias term
+        v = get_input(board)
+        a1 = np.dot(self.first, v)
         z1 = map(sigmoid, a1)
         a2 = np.dot(self.second, z1)
         z2 = map(sigmoid, a2)
@@ -91,11 +93,37 @@ class MachineLearner:
         z3 = map(sigmoid, a3)
         return z3
 
+    def list_scores(self):
+        for t in self.history:
+            print t.scores_before
+
     #TODO
-    def back_propogate(self, a1, y):
-        print "STUB"
+    def back_propogate(self, scores):
+        victory = 0
+        if scores[1] > scores[0]:
+            victory = 1
 
 def sigmoid(z):
-    return 1.0 / (1  + exp(-z) ) 
+    return 1.0 / (1  + exp(-z) )
+
+
+def get_input(board):
+    w = []
+    for t in board.tiles:
+        if not t.blank:
+            w.append(t.colour)
+    return np.array(w)
+
+    
+class Turn:
+
+    def __init__(self, board, predicts):
+        self.before = get_input(board)
+        self.scores_before = board.get_scores()
+        self.predicts = predicts
+        self.move = []
+
+    def put_move(self, move):
+        self.move = move
         
         
