@@ -32,12 +32,16 @@ class MachineLearner:
         board = boardmaker.Board()
         self.vectorize_moves(board)
         self.history = []
+        self.alpha = 0.0001
         
 
     def randomise_params(self):
         self.first = np.random.rand(143, 58) - 0.5
         self.second = np.random.rand(500, 143) - 0.5
         self.third = np.random.rand(834, 500) - 0.5
+        self.save_params()
+
+    def save_params(self):
         np.savez("params", first=self.first, second=self.second, third=self.third)
 
 
@@ -66,7 +70,8 @@ class MachineLearner:
             board.jump(source, target)
 
     def make_move(self, board):
-        p = self.forward_propogate(board)
+        v = get_input(board)
+        p = self.forward_propogate(v)
         t = Turn(board, p)
         m = np.min(p)
         p = map( lambda x: x-m, p )
@@ -76,35 +81,65 @@ class MachineLearner:
         c = 0
         for i in range(0, len(self.moves)):
             if c >= r:
-                t.put_move(self.moves[i])
+                t.put_move(i)
                 self.history.append(t)
                 return self.moves[i]
             else:
                 c += p[i]
+        return self.moves[-1]
 
-    def forward_propogate(self, board):
+    def forward_propogate(self, v):
         #TODO add bias term
-        v = get_input(board)
-        a1 = np.dot(self.first, v)
-        z1 = map(sigmoid, a1)
-        a2 = np.dot(self.second, z1)
-        z2 = map(sigmoid, a2)
-        a3 = np.dot(self.third, z2)
-        z3 = map(sigmoid, a3)
+        self.a1 = np.dot(self.first, v)
+        self.z1 = map(sigmoid, self.a1)
+        self.a2 = np.dot(self.second, self.z1)
+        self.z2 = map(sigmoid, self.a2)
+        self.a3 = np.dot(self.third, self.z2)
+        z3 = map(sigmoid, self.a3)
         return z3
 
     def list_scores(self):
         for t in self.history:
             print t.scores_before
 
-    #TODO
+    #TODO regularisation
     def back_propogate(self, scores):
+        delta1 = np.zeros((143, 58), dtype=np.float)
+        delta2 = np.zeros((500, 143), dtype=np.float)
+        delta3 = np.zeros((834, 500), dtype=np.float)
         victory = 0
         if scores[1] > scores[0]:
             victory = 1
+        for t in self.history:
+            z3 = self.forward_propogate(t.before)
+            if victory:
+                y = np.zeros(834)
+                y[t.move] = 1
+            else:
+                y = np.zeros(834)
+                y.fill(1/833)
+                y[t.move] = 0
+            d3 = self.a3 - y
+            d2 = np.dot( (np.transpose(self.third)), d3 ) * map(sig_grad, self.z2)
+            d1 = np.dot( np.transpose(self.second), d2 ) * map(sig_grad, self.z1)
+            delta3 += np.dot(d3.reshape(-1,1), self.a2.reshape(1,-1))
+            delta2 += np.dot(d2.reshape(-1,1), self.a1.reshape(1,-1))
+            delta1 += np.dot(d1.reshape(-1,1), t.before.reshape(1,-1))
+        delta3 = delta3 / len(self.history)
+        delta2 = delta2 / len(self.history)
+        delta1 = delta1 / len(self.history)
+        self.first += (delta1 * self.alpha)
+        self.second += (delta2 * self.alpha)
+        self.third += (delta3 * self.alpha)
+        self.save_params()
+            
+        
 
 def sigmoid(z):
     return 1.0 / (1  + exp(-z) )
+
+def sig_grad(z):
+    return sigmoid(z) * (1 - sigmoid(z) )
 
 
 def get_input(board):
@@ -121,7 +156,7 @@ class Turn:
         self.before = get_input(board)
         self.scores_before = board.get_scores()
         self.predicts = predicts
-        self.move = []
+        self.move = 0
 
     def put_move(self, move):
         self.move = move
