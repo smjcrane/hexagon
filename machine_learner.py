@@ -54,6 +54,7 @@ class MachineLearner:
                 #jump
                 self.moves.append( ( (t.x, t.y) , nn , "j" ) )
 
+
     def play(self, board, colour):
         move = self.make_move(board)
         if self.verbose:
@@ -102,9 +103,16 @@ class MachineLearner:
         for t in self.history:
             print t.scores_before
 
-    #TODO regularisation
+    def regularise(self):
+        tot1 = np.sum(self.first**2)
+        tot2 = np.sum(self.second**2)
+        tot3 = np.sum(self.third**2)
+        self.first /= tot1
+        self.second /= tot2
+        self.third /= tot3
+
     def back_propogate(self, scores):
-        delta1 = np.zeros((143, 58), dtype=np.float)
+        delta1 = np.zeros((143,  58), dtype=np.float)
         delta2 = np.zeros((500, 143), dtype=np.float)
         delta3 = np.zeros((834, 500), dtype=np.float)
         victory = 0
@@ -131,7 +139,29 @@ class MachineLearner:
         self.first += (delta1 * self.alpha)
         self.second += (delta2 * self.alpha)
         self.third += (delta3 * self.alpha)
+        self.regularise()
         self.save_params()
+
+    def mimic(self, turn, move):
+        delta1 = np.zeros((143, 58), dtype=np.float)
+        delta2 = np.zeros((500, 143), dtype=np.float)
+        delta3 = np.zeros((834, 500), dtype=np.float)
+        z3 = self.forward_propogate(turn.before)
+        y = np.zeros(834)
+        y[move] = 1
+        d3 = self.a3 - y
+        d2 = np.dot( (np.transpose(self.third)), d3 ) * map(sig_grad, self.z2)
+        d1 = np.dot( np.transpose(self.second), d2 ) * map(sig_grad, self.z1)
+        delta3 += np.dot(d3.reshape(-1,1), self.a2.reshape(1,-1))
+        delta2 += np.dot(d2.reshape(-1,1), self.a1.reshape(1,-1))
+        delta1 += np.dot(d1.reshape(-1,1), turn.before.reshape(1,-1))
+        delta3 = delta3 / len(self.history)
+        delta2 = delta2 / len(self.history)
+        delta1 = delta1 / len(self.history)
+        self.first += (delta1 * self.alpha)
+        self.second += (delta2 * self.alpha)
+        self.third += (delta3 * self.alpha)
+
             
         
 
