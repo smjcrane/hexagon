@@ -24,7 +24,12 @@ def play_game(player1, player2):
     return board.get_scores()
         
 m = ml.MachineLearner()
+m.randomise_params()
 
-graphics = False
-print play_game(random_player, m)
+graphics = True
 
+
+for i in range(0, 100):
+    s = play_game(random_player, m)
+    print s
+    m.back_propogate(s)

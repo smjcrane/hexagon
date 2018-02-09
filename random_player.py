@@ -22,18 +22,18 @@ def play(board, colour):
         else:
             move = random.choice(allowed_jumps)
             board.jump(move[0], move[1])
-            return
+            return ( (move[0].x, move[0].y) , (move[1].x, move[1].y), "j" )  
     elif len(allowed_jumps) == 0:
         move = random.choice(allowed_clones)
         board.clone(move[0], move[1])
-        return
+        return ( (move[0].x, move[0].y) , (move[1].x, move[1].y), "c" ) 
     else:
         move_type = random.randint(0,1)
         if move_type:
             move = random.choice(allowed_jumps)
             board.jump(move[0], move[1])
-            return
+            return ( (move[0].x, move[0].y) , (move[1].x, move[1].y), "j" ) 
         else:
             move = random.choice(allowed_clones)
             board.clone(move[0], move[1])
-            return
+            return ( (move[0].x, move[0].y) , (move[1].x, move[1].y), "c" ) 
