@@ -56,6 +56,7 @@ class MachineLearner:
 
 
     def play(self, board, colour):
+        self.find_allowed(board, colour)
         move = self.make_move(board)
         if self.verbose:
             print move
@@ -70,6 +71,23 @@ class MachineLearner:
         elif move[2] == "j":
             board.jump(source, target)
 
+    def find_allowed(self, board, colour):
+        mine = []
+        self.allowed_clones = []
+        self.allowed_jumps = []
+        for t in board.tiles:
+            if t.colour == colour:
+                mine.append(t)
+        for t in mine:
+            for n in t.neighbours:
+                    m = board.tile_lookup[n]
+                    if m.colour == 0 and not m.blank:
+                        self.allowed_clones.append((t, m))
+            for f in t.far_neighbours:
+                    m = board.tile_lookup[f]
+                    if m.colour == 0 and not m.blank:
+                        self.allowed_jumps.append((t, m))
+
     def make_move(self, board):
         v = get_input(board)
         p = self.forward_propogate(v)
@@ -78,17 +96,33 @@ class MachineLearner:
         p = map( lambda x: x-m, p )
         s = np.sum(p)
         p = map( lambda x: x/s, p)
-        r = random.random()
-        c = 0
-        for i in range(0, len(self.moves)):
-            if c >= r:
-                t.put_move(i)
-                self.history.append(t)
-                return self.moves[i]
-            else:
-                c += p[i]
-        return self.moves[-1]
-
+        #r = random.random()
+        #c = 0
+        #for i in range(0, len(self.moves)):
+        #    if c >= r:
+        #        t.put_move(i)
+        #        self.history.append(t)
+        #        return self.moves[i]
+        #    else:
+        #        c += p[i]
+        #return self.moves[-1]
+        max_so_far = 0
+        best_so_far = 0
+        i=-1
+        for (source, target) in self.allowed_clones:
+            i = self.moves.index( ( (source.x, source.y), (target.x, target.y), "c") )
+            if p[i] > max_so_far:
+                best_so_far = i
+                max_so_far = p[i]
+        for (source, target) in self.allowed_jumps:
+            i = self.moves.index( ( (source.x, source.y), (target.x, target.y), "j") )
+            if p[i] > max_so_far:
+                best_so_far = i
+                max_so_far = p[i]
+        t.put_move(i)
+        self.history.append(t)
+        return self.moves[i]
+        
     def forward_propogate(self, v):
         #TODO add bias term
         self.a1 = np.dot(self.first, v)
